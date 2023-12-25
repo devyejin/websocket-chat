@@ -12,7 +12,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { //WebSocket Connection 설정
 
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) { //client가 Websocket Servcer에 연결하는데 사용하는 endpoint
+    public void registerStompEndpoints(StompEndpointRegistry registry) { //client가 Websocket Servcer에 연결하는데 사용하는 endpoint 즉, 클라이언트에서 "/ws"해야 소켓통신 시작
         registry.addEndpoint("/ws").withSockJS(); //SockJS는 webSocket을 미지원하는 브라우저에서 fallback option(대체 기능) 활성화에 사용 -> SocketJs사용
     }
 

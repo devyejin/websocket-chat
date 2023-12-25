@@ -2,6 +2,7 @@ package com.example.websocketchat.controller;
 
 import com.example.websocketchat.model.ChatMessage;
 import com.example.websocketchat.model.MessageType;
+import com.example.websocketchat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ public class WebSocketEventListener {
 
     private final SimpMessageSendingOperations messagingTemplate;
 
+    private final ChatRoomRepository chatRoomRepository;
+
     // ChatController의 addUser() 메서드에서 /app/chat.addUser 시,입장을 broadcast했음 (topic 구독자들에게)
     //   그래서 별도 작업은 필요 없고, log만 찍음
     @EventListener
@@ -37,13 +40,24 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectionListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        String username = (String)headerAccessor.getSessionAttributes().get("username");
+//        String username = (String)headerAccessor.getSessionAttributes().get("username");
+        //uuid, roomId로 변경 (확장하면서)
+        String userUUID = (String)headerAccessor.getSessionAttributes().get("userUUID");
+        String roomId = (String)headerAccessor.getSessionAttributes().get("roomId");
+
+        chatRoomRepository.minusUserCnt(roomId); // 채팅방 참여인원 -1
+
+        String username = chatRoomRepository.getUserName(roomId, userUUID);
+        chatRoomRepository.delUser(roomId, userUUID); // 사용자 리스트에서 삭제
+
+
         if(username != null) {
             logger.info("User Disconnected : " + username);
 
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setType(MessageType.LEAVE);
             chatMessage.setSender(username);
+            chatMessage.setRoomId(roomId);
 
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         }
