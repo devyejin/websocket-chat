@@ -7,8 +7,8 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 
-@Configuration
-@EnableWebSocketMessageBroker // WebSocket server 사용
+//@Configuration
+//@EnableWebSocketMessageBroker // WebSocket server 사용
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { //WebSocket Connection 설정
 
     @Override

@@ -17,7 +17,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
     WebSocketEventListener를 이용해서 log, user 참여, 나가기 등을 broadcast!
  */
 @RequiredArgsConstructor
-@Component
+//@Component
 public class WebSocketEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
