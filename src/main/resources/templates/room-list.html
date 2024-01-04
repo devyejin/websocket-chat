@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방 개설</title>
+</head>
+<body>
+    <h1>채팅방 개설</h1>
+    <form method="post" action="/chat/create" id="chatForm">
+        <label for="roomName">채팅방 이름:</label>
+        <input type="text" id="roomName" name="roomName" required>
+        <input type="submit" value="채팅방 만들기">
+    </form>
+
+    <h1>채팅방 목록</h1>
+    <ul>
+        <li th:each="room:${list}">
+            <a th:href="@{'/chat/room?roomId='+${room.roomId}}" th:text="${room.roomName}"></a>
+        </li>
+    </ul>
+
+</body>
+</html>

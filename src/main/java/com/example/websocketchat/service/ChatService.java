@@ -1,7 +1,6 @@
 package com.example.websocketchat.service;
 
 import com.example.websocketchat.model.ChatRoom;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,45 +25,99 @@ import java.util.*;
 @Service
 public class ChatService {
 
-    private final ObjectMapper mapper;
-    private Map<String, ChatRoom> chatRooms; // 임시 db
+//    private final ObjectMapper mapper; stomp에서 해줌
+    private Map<String, ChatRoom> chatRoomMap; // 임시 db
 
 
-    @PostConstruct
+    @PostConstruct // ChatService 객체가 생성된 후 초기화 됨
     private void init() {
-        chatRooms = new LinkedHashMap<>();
+        chatRoomMap = new LinkedHashMap<>();
     }
 
     //db연동시 repository클래스로 옮길 로직들
     public List<ChatRoom> findAllRoom() {
-        return new ArrayList<>(chatRooms.values());
+        List<ChatRoom> chatRooms = new ArrayList<>(this.chatRoomMap.values());
+        Collections.reverse(chatRooms);
+
+        return chatRooms; //생성 최신순으로 반환
     }
 
     public ChatRoom findRoomById(String roomId) {
-        return chatRooms.get(roomId);
+        return chatRoomMap.get(roomId);
     }
 
-    public ChatRoom createRoom(String name) {
-        String roomId = UUID.randomUUID().toString();
+    public ChatRoom createChatRoom(String roomName) {
+        ChatRoom chatRoom = new ChatRoom().create(roomName);
 
-        ChatRoom room = ChatRoom.builder()
-                .roomId(roomId)
-                .name(name)
-                .build();
+        chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
 
-        chatRooms.put(roomId, room); //db연동시 수정할 부분
-        return room;
+        return chatRoom;
     }
 
-    public <T> void sendMessage(WebSocketSession session, T message) {
-        //WebSocket 제공 기능
-        try {
-            session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
-        } catch (IOException e) {
-            log.error("error={}", e.getMessage());
-            throw new RuntimeException(e);
+    public void plusUserCnt(String roomId) {
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+        chatRoom.setUserCount(chatRoom.getUserCount()+1);
+    }
+
+    public void minusUserCnt(String roomId) {
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+        chatRoom.setUserCount(chatRoom.getUserCount()-1);
+    }
+
+    public String addUser(String roomId, String userName) {
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+
+        //user도 userId(UUID)로 관리
+        String userUUID = UUID.randomUUID().toString();
+        chatRoom.getUserList().put(userUUID,userName);
+
+        return userUUID;
+    }
+
+    //유저 이름 충복 체크, 중복시 랜덤 숫자 부여
+    public String isDuplicateName(String roomId, String userName) {
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+
+        while(chatRoom.getUserList().containsValue(userName)) {
+            int ranNum = (int) (Math.random() * 100) + 1;
+
+            userName += ranNum;
         }
+
+        return userName;
     }
+
+
+    public void delUser(String roomId, String userUUID) {
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+        chatRoom.getUserList().remove(userUUID);
+    }
+
+    public String getUserName(String roomId, String userUUID) {
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+        return chatRoom.getUserList().get(userUUID);
+    }
+
+    public ArrayList<String> getUserList(String roomId) {
+        ArrayList<String> list = new ArrayList<>();
+
+        ChatRoom chatRoom = chatRoomMap.get(roomId);
+
+        chatRoom.getUserList().forEach((key,value) -> list.add(value)); // uuid제외하고 userName만 반환
+        return list;
+    }
+
+
+
+//    public <T> void sendMessage(WebSocketSession session, T message) {
+//        //WebSocket 제공 기능
+//        try {
+//            session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
+//        } catch (IOException e) {
+//            log.error("error={}", e.getMessage());
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 
 

@@ -12,13 +12,13 @@
 
 <div id="username-page">
     <div class="username-page-container">
-        <h1 class="title">Type your username</h1>
+        <h1 class="title">사용할 사용자 명을 입력하세요!</h1>
         <form id="usernameForm" name="usernameForm">
             <div class="form-group">
                 <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control" />
             </div>
             <div class="form-group">
-                <button type="submit" class="accent username-submit">Start Chatting</button>
+                <button type="submit" class="accent username-submit">채팅 시작하기!</button>
             </div>
         </form>
     </div>
@@ -27,7 +27,7 @@
 <div id="chat-page" class="hidden">
     <div class="chat-container">
         <div class="chat-header">
-            <h2>Spring WebSocket Chat Demo</h2>
+            <h2>채팅창</h2>
         </div>
         <div class="connecting">
             Connecting...
@@ -45,6 +45,8 @@
         </form>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+출처: https://kiljh.tistory.com/235 [Dominic Blog:티스토리]
 <!-- sockJs (웹브라우저가 WebSocket미지원시 동일 기능하도록 함), stomp 자바스크립트 라이브러리 추가 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
