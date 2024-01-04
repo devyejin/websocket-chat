@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 /*
@@ -35,6 +36,8 @@ public class ChatController {
      */
     @MessageMapping("/chat/sendMessage") //즉, 이 메서드의 엔드포인트는 "/pub/chat/sendMessage"
     public void sendMessage(@Payload ChatDTO chatDTO) {
+        chatDTO.setTime(Instant.now().toString());
+
         log.info("chatDTO={}", chatDTO);
 //        chatDTO.setMessage(chatDTO.getMessage()); 불필요한 로직같음
         //서버에서 메시지를 받고, sub들에게 전송

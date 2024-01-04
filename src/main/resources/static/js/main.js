@@ -167,30 +167,43 @@ function onMessageReceived(payload) {
         console.log(("leave display"));
 
     } else {
-        console.log("received chat-message")
+        console.log("received chat-message");
         messageElement.classList.add('chat-message');
 
-        var avatarElement = document.createElement('i');
-        var avatarText = document.createTextNode(chat.sender[0]);
+        let avatarElement = document.createElement('i');
+        let avatarText = document.createTextNode(chat.sender[0]);
         avatarElement.appendChild(avatarText);
         avatarElement.style['background-color'] = getAvatarColor(chat.sender);
 
         messageElement.appendChild(avatarElement);
 
-        var usernameElement = document.createElement('span');
-        var usernameText = document.createTextNode(chat.sender);
+        let usernameElement = document.createElement('span');
+        let usernameText = document.createTextNode(chat.sender);
         usernameElement.appendChild(usernameText);
         messageElement.appendChild(usernameElement);
+
+        let textElement = document.createElement('p');
+        let messageText = document.createTextNode(chat.message);
+        textElement.appendChild(messageText);
+
+        // 시간을 메시지 텍스트 오른쪽에 추가
+        let timeElement = document.createElement('span');
+        let timeText = document.createTextNode(getFormattedTime(chat.time));
+        timeElement.appendChild(timeText);
+        textElement.appendChild(timeElement);
+        timeElement.style.float = 'right'; //css 파일로 뺴야 함
+
+        messageElement.appendChild(textElement);
     }
-
-    var textElement = document.createElement('p');
-    var messageText = document.createTextNode(chat.message);
-    textElement.appendChild(messageText);
-
-    messageElement.appendChild(textElement);
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;
+}
+
+function getFormattedTime(timestamp) {
+    const date = new Date(timestamp);
+    const options = { hour: 'numeric', minute: 'numeric', hour12: true, hourCycle: 'h23' };
+    return date.toLocaleTimeString('ko-KR', options);
 }
 
 
