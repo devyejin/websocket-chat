@@ -119,7 +119,11 @@ function getUserList() {
             }
             //list 요소에 첨가
             $list.html(users);
-        }
+        },
+        error: (error)  => {
+            console.error("사용자 목록 조회 실패");
+            console.error(error);
+    }
     })
 
 }
@@ -158,6 +162,7 @@ function onMessageReceived(payload) {
         messageElement.classList.add('event-message');
         chat.content = chat.sender + chat.message;
         getUserList();
+
         console.log("join display");
 
     } else if (chat.type === 'LEAVE') {

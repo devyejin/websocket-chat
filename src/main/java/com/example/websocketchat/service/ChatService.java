@@ -104,6 +104,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomMap.get(roomId);
 
         chatRoom.getUserList().forEach((key,value) -> list.add(value)); // uuid제외하고 userName만 반환
+        log.info("사용자 목록 list ={}",list);
         return list;
     }
 
