@@ -104,7 +104,7 @@ function onError(error) {
 //ajax로 유저 리스트를 받으며 유저 입장/퇴장 문구 나올때마다 실행
 function getUserList() {
     //id가 list인 요소를 가져오기 (jQuery)
-    const $list = $("#list");
+    let $list = $("#list");
 
     $.ajax({
         type:"GET",
@@ -115,7 +115,9 @@ function getUserList() {
         success: (data) => {
             let users = "";
             for(let i=0; i<data.length; i++) {
+                console.log(data[i]);
                 users += "<li class='dropdown-item'>" + data[i] + "</li>"
+                console.log(users);
             }
             //list 요소에 첨가
             $list.html(users);
@@ -163,13 +165,27 @@ function onMessageReceived(payload) {
         chat.content = chat.sender + chat.message;
         getUserList();
 
+        let textElement = document.createElement('p');
+        let messageText = document.createTextNode(chat.message);
+        textElement.appendChild(messageText);
+
+        messageElement.appendChild(textElement);
+
         console.log("join display");
 
     } else if (chat.type === 'LEAVE') {
         messageElement.classList.add('event-message');
         chat.content = chat.sender + chat.message;
+        console.log(chat.content);
+
         getUserList();
         console.log(("leave display"));
+
+        let textElement = document.createElement('p');
+        let messageText = document.createTextNode(chat.message);
+        textElement.appendChild(messageText);
+
+        messageElement.appendChild(textElement);
 
     } else {
         console.log("received chat-message");
@@ -187,9 +203,12 @@ function onMessageReceived(payload) {
         usernameElement.appendChild(usernameText);
         messageElement.appendChild(usernameElement);
 
+
         let textElement = document.createElement('p');
         let messageText = document.createTextNode(chat.message);
         textElement.appendChild(messageText);
+
+        messageElement.appendChild(textElement);
 
         // 시간을 메시지 텍스트 오른쪽에 추가
         let timeElement = document.createElement('span');
@@ -197,9 +216,9 @@ function onMessageReceived(payload) {
         timeElement.appendChild(timeText);
         textElement.appendChild(timeElement);
         timeElement.style.float = 'right'; //css 파일로 뺴야 함
-
-        messageElement.appendChild(textElement);
     }
+
+
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;

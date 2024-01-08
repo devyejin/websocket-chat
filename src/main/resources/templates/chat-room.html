@@ -32,6 +32,15 @@
         <div class="connecting">
             Connecting...
         </div>
+        <div class="btn-group dropend">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="showUserListButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                참가한 유저
+            </button>
+            <div id="list" class="dropdown-menu" aria-labelledby="showUserListButton">
+
+            </div>
+        </div>
         <ul id="messageArea">
 
         </ul>
@@ -46,7 +55,6 @@
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-출처: https://kiljh.tistory.com/235 [Dominic Blog:티스토리]
 <!-- sockJs (웹브라우저가 WebSocket미지원시 동일 기능하도록 함), stomp 자바스크립트 라이브러리 추가 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>

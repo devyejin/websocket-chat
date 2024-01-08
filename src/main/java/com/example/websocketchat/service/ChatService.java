@@ -50,6 +50,7 @@ public class ChatService {
         ChatRoom chatRoom = new ChatRoom().create(roomName);
 
         chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
+        log.info("왜 null이지 chatRoom={} ",chatRoomMap.get(chatRoom.getRoomId()));
 
         return chatRoom;
     }
@@ -102,6 +103,7 @@ public class ChatService {
         ArrayList<String> list = new ArrayList<>();
 
         ChatRoom chatRoom = chatRoomMap.get(roomId);
+        log.info("채팅방 유저 목록 조회 서비스단 chatRoom={}",chatRoom);
 
         chatRoom.getUserList().forEach((key,value) -> list.add(value)); // uuid제외하고 userName만 반환
         log.info("사용자 목록 list ={}",list);

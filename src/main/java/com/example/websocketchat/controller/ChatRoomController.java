@@ -35,6 +35,8 @@ public class ChatRoomController {
         ChatRoom chatRoom = chatService.createChatRoom(roomName);
         redirectAttributes.addFlashAttribute("chatRoom", chatRoom);
 
+        log.info("채팅방 생성 chatRoom={}", chatRoom);
+
         return "redirect:/chat/rooms";
     }
 

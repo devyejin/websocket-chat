@@ -65,14 +65,15 @@ public class ChatController {
 
     }
 
-    @GetMapping("/user-list")
+    @GetMapping("/chat/user-list")
     @ResponseBody
     public ArrayList<String> userList(String roomId) {
+        log.info("roomId={}", roomId);
         return chatService.getUserList(roomId);
     }
 
 
-    @GetMapping("/duplicate-username")
+    @GetMapping("/chat/duplicate-username")
     @ResponseBody
     public String isDuplicateName(@RequestParam("roomId") String roomId, @RequestParam("username") String username ) {
 
