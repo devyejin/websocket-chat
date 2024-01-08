@@ -1,15 +1,5 @@
 package com.example.websocketchat.handler;
 
-import com.example.websocketchat.model.ChatDTO;
-import com.example.websocketchat.model.ChatRoom;
-import com.example.websocketchat.service.ChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 /*
     - STOMP 없이 WebSocket만 이용하는 경우
     - 웹 소켓 클라이언트로부터 채팅 메시지 전달받아 객체로 변환
@@ -31,7 +21,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 //        log.info("payload={}", payload);
 //
 //        //STOMP미적용시에는 직접 Mapper로 변환 작업
-//        ChatDTO chatMessage = mapper.readValue(payload, ChatDTO.class);
+//        ChatMessage chatMessage = mapper.readValue(payload, ChatMessage.class);
 //        log.info("chatMessage={}",chatMessage); //session에 해당하나? 찍어보고 이름 session/chatMessage 결정하기
 //
 //        ChatRoom room = chatService.findRoomById(chatMessage.getRoomId());

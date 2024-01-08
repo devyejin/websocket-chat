@@ -1,6 +1,6 @@
 package com.example.websocketchat.util;
 
-import com.example.websocketchat.model.ChatDTO;
+import com.example.websocketchat.model.ChatMessage;
 import com.example.websocketchat.model.MessageType;
 import com.example.websocketchat.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -49,14 +48,14 @@ public class WebSocketEventListener {
         if(userName != null) {
             log.info("Disconnect User : " + userName);
 
-            ChatDTO chatDTO = ChatDTO.builder()
+            ChatMessage chatMessage = ChatMessage.builder()
                     .type(MessageType.LEAVE)
                     .sender(userName)
                     .message(userName + " 님이 퇴장하셨습니다.")
                     .build();
 
             //구독자들에게 전송
-            template.convertAndSend("/sub/chat/room/"+roomId,chatDTO);
+            template.convertAndSend("/sub/chat/room/"+roomId, chatMessage);
         }
     }
 

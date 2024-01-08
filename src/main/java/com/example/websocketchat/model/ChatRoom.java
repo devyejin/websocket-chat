@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +19,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class ChatRoom {
+public class ChatRoom implements Serializable { //Redis에 저장하는 객체들은 Serialize 가능해야 함 -> Serializable 구현
+
+    private static final long serialVersionUID = 6494678977089006639L;
 
     private String roomId;
     private String roomName; //채팅방 이름
@@ -27,7 +30,7 @@ public class ChatRoom {
     private HashMap<String,String> userList = new HashMap<String,String>();
 
     //생성자로 하는게 더 깔끔할거같기도하면서도, 메서드명 명확한게 더 나은것도 같고..
-    public ChatRoom create(String roomName) {
+    public static ChatRoom create(String roomName) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomId = UUID.randomUUID().toString();
         chatRoom.roomName = roomName;
@@ -47,7 +50,7 @@ public class ChatRoom {
 //
 //
 //
-//    public void handleAction(WebSocketSession session, ChatDTO message, ChatService chatService) {
+//    public void handleAction(WebSocketSession session, ChatMessage message, ChatService chatService) {
 //        MessageType messageType = message.getType();
 //
 //        switch (message.getType()) {

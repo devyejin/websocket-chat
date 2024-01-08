@@ -1,7 +1,9 @@
 package com.example.websocketchat.controller;
 
-import com.example.websocketchat.model.ChatDTO;
-import com.example.websocketchat.model.ChatRoom;
+import com.example.websocketchat.model.ChatMessage;
+import com.example.websocketchat.model.MessageType;
+import com.example.websocketchat.pubsub.RedisPublisher;
+import com.example.websocketchat.repository.ChatRoomRepository;
 import com.example.websocketchat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
+
 /*
     채팅 수신(sub), 송신(pub)
  */
@@ -26,6 +28,10 @@ public class ChatController {
 
     private final ChatService chatService;
 
+    //redis 추가
+    private final RedisPublisher redisPublisher; // 클라이언트 메시지 -> 컨트롤러 -> Redis Pub
+    private final ChatRoomRepository chatRoomRepository;
+
     //Spring framework의 메시징 기능 클래스, WebSocket 통신 지원, 메시지 교환 쉽게 처리 가능, @SendTo 어노테이션 역할 대신 함
     private final SimpMessageSendingOperations template; // SimpMessageSendingOperations는 인터페이스, 대표적 구현체 SimpMessagingTemplate 클래스
 
@@ -35,33 +41,47 @@ public class ChatController {
           "/pub"으로 시작하는 메시지들은 mesage-handling methods 즉, @MessageMapping어노테이션이 붙은 메서드가 처리 (라우팅)
      */
     @MessageMapping("/chat/sendMessage") //즉, 이 메서드의 엔드포인트는 "/pub/chat/sendMessage"
-    public void sendMessage(@Payload ChatDTO chatDTO) {
-        chatDTO.setTime(Instant.now().toString());
+    public void sendMessage(@Payload ChatMessage chatMessage) {
+        chatMessage.setTime(Instant.now().toString()); //사실 이 부분도 service나 repository에서 하는게 맞음
 
-        log.info("chatDTO={}", chatDTO);
-//        chatDTO.setMessage(chatDTO.getMessage()); 불필요한 로직같음
+        log.info("chatMessage={}", chatMessage);
+//        chatMessage.setMessage(chatMessage.getMessage()); 불필요한 로직같음
         //서버에서 메시지를 받고, sub들에게 전송
-        template.convertAndSend("/sub/chat/room/"+chatDTO.getRoomId(),chatDTO);
+//        template.convertAndSend("/sub/chat/room/"+ chatMessage.getRoomId(), chatMessage);
+
+        //이제는 redis pub/sub에서 처리  (topic=구독중인 채팅방)
+        redisPublisher.publish(chatRoomRepository.getTopic(chatMessage.getRoomId()), chatMessage);
+
     }
 
     //퇴장은 EventListener를 통해서 확인
     @MessageMapping("/chat/enterUser")
-    public void enterUser(@Payload ChatDTO chatDTO, SimpMessageHeaderAccessor headerAccessor) {
+    public void enterUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         log.info("enterUser 메서드 호출!!");
-        log.info("chatDTO={}", chatDTO);
+        log.info("chatMessage={}", chatMessage);
         //채팅방 인원 + 1
-        chatService.plusUserCnt(chatDTO.getRoomId());
+        chatService.plusUserCnt(chatMessage.getRoomId());
+//
+//        //채팅방에 사용자 추가
+//        String userUUID = chatService.addUser(chatMessage.getRoomId(), chatMessage.getSender());
+//
+//        //WebSocket Session에 userUUID 저장
+//        headerAccessor.getSessionAttributes().put("userUUID", userUUID);
+//        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+//
+//        chatMessage.setMessage(chatMessage.getSender()+ " 님이 입장하셨습니다.");
+//        //방 참여자들에게 전송
+//        template.convertAndSend("/sub/chat/room/"+ chatMessage.getRoomId(), chatMessage);
 
-        //채팅방에 사용자 추가
-        String userUUID = chatService.addUser(chatDTO.getRoomId(), chatDTO.getSender());
 
-        //WebSocket Session에 userUUID 저장
-        headerAccessor.getSessionAttributes().put("userUUID", userUUID);
-        headerAccessor.getSessionAttributes().put("roomId", chatDTO.getRoomId());
+        //redis pub/sub에서 처리
+        if(MessageType.JOIN.equals(chatMessage.getType())) {
+            chatRoomRepository.enterChatRoom(chatMessage.getRoomId());
+            chatMessage.setMessage(chatMessage.getSender()+"님이 입장하셨습니다.");
+        }
 
-        chatDTO.setMessage(chatDTO.getSender()+ " 님이 입장하셨습니다.");
-        //방 참여자들에게 전송
-        template.convertAndSend("/sub/chat/room/"+ chatDTO.getRoomId(), chatDTO);
+        //websocket 발행 메시지 -> redis로 발행
+        redisPublisher.publish(chatRoomRepository.getTopic(chatMessage.getRoomId()), chatMessage);
 
     }
 

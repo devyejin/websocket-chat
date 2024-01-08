@@ -1,13 +1,12 @@
 package com.example.websocketchat.controller;
 
 
-import com.example.websocketchat.model.ChatMessage;
+import com.example.websocketchat.model.ChatMessageTemp;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.stereotype.Controller;
 
 // 한명의 Client로부터 mewssage를 받고 다른 사람들한테 broadcasting하는 역할
 @Log4j2
@@ -26,17 +25,17 @@ public class ChatControllerTemp {
     */
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public") // 메시지 출력을 못해서 원인찾다보니 어디로 보낼지 대상 뺴먹었네!
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        log.info("chatMessage={}",chatMessage);
-        return chatMessage;
+    public ChatMessageTemp sendMessage(@Payload ChatMessageTemp chatMessageTemp) {
+        log.info("chatMessageTemp={}", chatMessageTemp);
+        return chatMessageTemp;
     }
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage,
-                               SimpMessageHeaderAccessor headerAccessor) {
+    public ChatMessageTemp addUser(@Payload ChatMessageTemp chatMessageTemp,
+                                   SimpMessageHeaderAccessor headerAccessor) {
         // Websocket session에 username 추가
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
+        headerAccessor.getSessionAttributes().put("username", chatMessageTemp.getSender());
+        return chatMessageTemp;
     }
 }

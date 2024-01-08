@@ -47,7 +47,7 @@ public class ChatService {
     }
 
     public ChatRoom createChatRoom(String roomName) {
-        ChatRoom chatRoom = new ChatRoom().create(roomName);
+        ChatRoom chatRoom = ChatRoom.create(roomName);
 
         chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
         log.info("왜 null이지 chatRoom={} ",chatRoomMap.get(chatRoom.getRoomId()));

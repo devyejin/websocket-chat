@@ -1,6 +1,6 @@
 package com.example.websocketchat.controller;
 
-import com.example.websocketchat.model.ChatMessage;
+import com.example.websocketchat.model.ChatMessageTemp;
 import com.example.websocketchat.model.MessageType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -41,11 +40,11 @@ public class WebSocketEventListener {
         if(username != null) {
             logger.info("User Disconnected : " + username);
 
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setType(MessageType.LEAVE);
-            chatMessage.setSender(username);
+            ChatMessageTemp chatMessageTemp = new ChatMessageTemp();
+            chatMessageTemp.setType(MessageType.LEAVE);
+            chatMessageTemp.setSender(username);
 
-            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+            messagingTemplate.convertAndSend("/topic/public", chatMessageTemp);
         }
     }
 }
