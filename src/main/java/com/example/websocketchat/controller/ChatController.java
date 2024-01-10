@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
     채팅 수신(sub), 송신(pub)
@@ -26,7 +28,7 @@ import java.util.ArrayList;
 @Controller
 public class ChatController {
 
-    private final ChatService chatService;
+//    private final ChatService chatService; //redis 사용 이전 버전
 
     //redis 추가
     private final RedisPublisher redisPublisher; // 클라이언트 메시지 -> 컨트롤러 -> Redis Pub
@@ -59,8 +61,9 @@ public class ChatController {
     public void enterUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         log.info("enterUser 메서드 호출!!");
         log.info("chatMessage={}", chatMessage);
-        //채팅방 인원 + 1
-        chatService.plusUserCnt(chatMessage.getRoomId());
+
+//        //채팅방 인원 + 1
+//        chatService.plusUserCnt(chatMessage.getRoomId());
 //
 //        //채팅방에 사용자 추가
 //        String userUUID = chatService.addUser(chatMessage.getRoomId(), chatMessage.getSender());
@@ -73,6 +76,13 @@ public class ChatController {
 //        //방 참여자들에게 전송
 //        template.convertAndSend("/sub/chat/room/"+ chatMessage.getRoomId(), chatMessage);
 
+        //채팅방 사용자 추가
+        String userUUID = chatRoomRepository.addUser(chatMessage.getRoomId(), chatMessage.getSender());
+
+
+        //WebSocket Session에 userUUID, roomId 저장
+        headerAccessor.getSessionAttributes().put("userUUID",userUUID);
+        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
         //redis pub/sub에서 처리
         if(MessageType.JOIN.equals(chatMessage.getType())) {
@@ -88,11 +98,18 @@ public class ChatController {
     @GetMapping("/chat/user-list")
     @ResponseBody
     public ArrayList<String> userList(String roomId) {
-        log.info("roomId={}", roomId);
-        return chatService.getUserList(roomId);
+        log.info("user-list 메서드 호출 roomId={}", roomId);
+        ConcurrentHashMap<String, String> userList = chatRoomRepository.getUserList(roomId);//던져지는 값 체크
+
+        //프론트단에서 배열처리 하기위해 List로 변환
+        return new ArrayList<>(userList.values());
     }
 
 
+
+    /**
+     *  로그인 구현 이전까지 사용할 로직 새로 추가 해야 함
+     */
     @GetMapping("/chat/duplicate-username")
     @ResponseBody
     public String isDuplicateName(@RequestParam("roomId") String roomId, @RequestParam("username") String username ) {
@@ -100,10 +117,11 @@ public class ChatController {
         log.info("roomId={}, username={}", roomId,username);
 
         //중복 있는 경우 숫자 붙여서 반환
-        String userName = chatService.isDuplicateName(roomId, username);
-        log.info("userName ={}", userName);
-
-        return userName;
+//        String userName = chatService.isDuplicateName(roomId, username);
+//        log.info("userName ={}", userName);
+//
+//        return userName;
+        return username;
     }
 
 

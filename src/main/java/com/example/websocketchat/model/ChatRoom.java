@@ -7,11 +7,13 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
     - 채팅방에 입장한 클라이언트 정보 즉, 클라이언트 세션 정보 보유
@@ -21,13 +23,14 @@ import java.util.UUID;
 @ToString
 public class ChatRoom implements Serializable { //Redis에 저장하는 객체들은 Serialize 가능해야 함 -> Serializable 구현
 
+    @Serial
     private static final long serialVersionUID = 6494678977089006639L;
 
     private String roomId;
     private String roomName; //채팅방 이름
     private long userCount; //채팅방 인원 수
 
-    private HashMap<String,String> userList = new HashMap<String,String>();
+    private ConcurrentHashMap<String,String> userList = new ConcurrentHashMap<String,String>(); //uuid, userName 으로 저장하겠지?
 
     //생성자로 하는게 더 깔끔할거같기도하면서도, 메서드명 명확한게 더 나은것도 같고..
     public static ChatRoom create(String roomName) {

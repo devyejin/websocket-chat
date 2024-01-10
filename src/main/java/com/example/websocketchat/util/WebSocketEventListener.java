@@ -1,7 +1,9 @@
 package com.example.websocketchat.util;
 
+import com.example.websocketchat.controller.ChatController;
 import com.example.websocketchat.model.ChatMessage;
 import com.example.websocketchat.model.MessageType;
+import com.example.websocketchat.repository.ChatRoomRepository;
 import com.example.websocketchat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -18,7 +20,8 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 public class WebSocketEventListener {
 
     private final SimpMessageSendingOperations template;
-    private final ChatService chatService;
+//    private final ChatService chatService;
+    private final ChatRoomRepository chatRoomRepository;
 
     //입장 메시지는 /pub/chat/enterUser 에서 처리
     @EventListener
@@ -36,12 +39,14 @@ public class WebSocketEventListener {
 
         //stomp session에서 userUUID, roomId 확인
         String userUUID = (String)headerAccessor.getSessionAttributes().get("userUUID");
+        log.info("userUUID={}",userUUID);
         String roomId = (String)headerAccessor.getSessionAttributes().get("roomId");
 
-        String userName = chatService.getUserName(roomId, userUUID);
+//        String userName = chatService.getUserName(roomId, userUUID);
+        String userName = chatRoomRepository.getUserName(roomId, userUUID);
 
-        chatService.minusUserCnt(roomId);
-        chatService.delUser(roomId,userUUID);
+//        chatService.minusUserCnt(roomId);
+//        chatService.delUser(roomId,userUUID);  //로직추가해야함
 
         log.info("check disconnection event username = {}", userName);
 

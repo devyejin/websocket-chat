@@ -5,16 +5,17 @@ import com.example.websocketchat.model.ChatRoom;
 import com.example.websocketchat.pubsub.RedisSubscriber;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @RequiredArgsConstructor
 @Repository
 public class ChatRoomRepository {
@@ -26,7 +27,7 @@ public class ChatRoomRepository {
     private final RedisSubscriber redisSubscriber;
 
     //redis
-    private static final String CHAT_ROOMS = "CHAT_ROOM";
+    private static final String CHAT_ROOMS = "CHAT_ROOM"; //redis에서 key값으로 사용 (종류 분류?)
     private final RedisTemplate<String,Object> redisTemplate;
     private HashOperations<String,String, ChatRoom> opsHashChatRoom;
 
@@ -40,7 +41,14 @@ public class ChatRoomRepository {
     }
 
     public List<ChatRoom> findAllRoom() {
-        return opsHashChatRoom.values(CHAT_ROOMS);
+//        return opsHashChatRoom.values(CHAT_ROOMS);
+
+        List<ChatRoom> chatRoomList = opsHashChatRoom.values(CHAT_ROOMS);
+        chatRoomList.stream().forEach(chatRoom -> {
+            log.info("chatRoom={}", chatRoom);
+        });
+
+        return chatRoomList;
     }
 
     public ChatRoom findRoomById(String roomId) {
@@ -84,6 +92,54 @@ public class ChatRoomRepository {
 //
 //    }
 
-    public void joinChatRoom(String roomId) {
+
+    public ConcurrentHashMap<String, String> getUserList(String roomId) {
+        ChatRoom chatRoom = opsHashChatRoom.get(CHAT_ROOMS, roomId);
+
+        if(chatRoom == null) {
+            log.error("roomId={} 에 해당하는 ChatRoom이 존재하지 않음", roomId);
+            throw new NoSuchElementException(roomId); //임시 예외처리, 명확히 수정
+        }
+
+        log.info("chatRoom={}", chatRoom);
+
+        ConcurrentHashMap<String, String> userList = chatRoom.getUserList();
+        return userList;
+    }
+
+    /**
+     * TODO : 예외처리 명확히 하기
+     */
+
+    public String getUserName(String roomId, String userUUID) {
+        ConcurrentHashMap<String, String> userList = getUserList(roomId);
+
+        if(userList.isEmpty()) {
+            log.error("userList가 존재하지 않음 , roomId={}", roomId);
+            throw new NoSuchElementException(roomId);
+        }
+
+        return userList.get(userUUID);
+    }
+
+
+    public String addUser(String roomId, String userName) {
+
+        log.info("======== addUser 호출============");
+        ChatRoom chatRoom = opsHashChatRoom.get(CHAT_ROOMS, roomId);
+
+        if(chatRoom == null) {
+            log.error("roomId={} 에 해당하는 ChatRoom이 존재하지 않음", roomId);
+            throw new NoSuchElementException(roomId); //임시 예외처리, 명확히 수정
+        }
+
+        log.info("chatRoom={}",chatRoom);
+
+        String userUUID = UUID.randomUUID().toString();
+        chatRoom.getUserList().put(userUUID, userName);
+
+        opsHashChatRoom.put(CHAT_ROOMS,roomId,chatRoom);
+
+        return userUUID;
     }
 }

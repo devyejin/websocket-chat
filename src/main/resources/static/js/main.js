@@ -18,6 +18,7 @@ var colors = [
 //roomId param 가져오기
 let url = new URL(location.href).searchParams;
 let roomId = url.get('roomId');
+let $list;
 
 //socket 통신 연결!
 function connect(event) {
@@ -104,7 +105,12 @@ function onError(error) {
 //ajax로 유저 리스트를 받으며 유저 입장/퇴장 문구 나올때마다 실행
 function getUserList() {
     //id가 list인 요소를 가져오기 (jQuery)
-    let $list = $("#list");
+    $(document).ready(() => {
+        $list = $("#list");
+        console.log($list);
+    })
+
+    console.log("usetList 호출!");
 
     $.ajax({
         type:"GET",
@@ -117,7 +123,7 @@ function getUserList() {
             for(let i=0; i<data.length; i++) {
                 console.log(data[i]);
                 users += "<li class='dropdown-item'>" + data[i] + "</li>"
-                console.log(users);
+                console.log("users={}", users);
             }
             //list 요소에 첨가
             $list.html(users);
